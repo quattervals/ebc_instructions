@@ -27,13 +27,10 @@
 
 ## Clone
 
+tbd
 Without Account: `git clone git://github.com/quattervals/csc.git`
 Instead of the "normal" `git@github.com:quattervals/csc.git`
 
-
-
-## Messing with Docker
-docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" vsc-aoc22-068b3058255ca45b4e0ab5efa08e9ec452f95af6ef36afba2cb2c1e4aef0c798-uid /bin/bash
 
 ## Helpful commands
 
@@ -43,6 +40,8 @@ docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xau
 - repo overview with git graph
 - who has done that mess? `git blame <filename>`
   - decent IDEs show bleme info when hovering over a line
+- git branch --set-upstream-to=origin/<branch> <local_branch>
+
 
 ## Resources
 - [Agile Manifesto: Values](https://agilemanifesto.org/)
@@ -165,16 +164,16 @@ its behavior accordingly.
 
 ## Tasks
 
+It is recommended to do the tasks in the suggested order. The results build on top of each other.
+
 ### Clone the remote repo
 
 - clone
 - look at the history
 
-
-
 ### Simple Workflow
 
-Absolute minimal workflow
+An absolute minimal workflow
 
 
 We add to `agile_principles.md`
@@ -334,8 +333,8 @@ Finish the rebase and merge back to `main` so that the history looks like this
 gitGraph
   commit id: "Principle 3,4,5"
   branch feature
-  commit id: "Agile Values 1,2"
   commit id: "HA-Agile Values 1,2"
+  commit id: "Agile Values 1,2"
   checkout main
   merge feature
 ```
@@ -345,8 +344,84 @@ BTW: if you run into a situation where there is a risk of losing your changes, j
 - `git branch feature_backup`
 - retry your operation
 
-### Push some branch to remote
+### Synchronize with Remote
 
-### merge on remote
+Since git is a _distributed_ version control system, there is a central repository, often called 'remote', through which people synchronize their work. Therefore, it is a good idea to synchronize our local repository to the remote repository.
+- `git fetch` to download objects and refs from remote. This doesn't do anything to your local branches
+- `git pull` to update current branch with content of its remote counterpart.
 
-### rebase, merge conflict
+Let's update our local repo
+- switch to `main`
+- pull
+- the `main` in remote has changed in the meantime.
+
+So again, we have a conflict. Let's not directly solve the conflict this time. On a larger scale, our local `main` branch is actually a feature. So let's rename:
+- rename: `git branch -m main feature_agile`
+- get `main` back as it is on the remote `git checkout -b main origin/main`
+  - this is not absolutely necessary but is often handy
+
+The history should now look like this:
+```mermaid
+gitGraph
+  commit
+  branch feature_agile
+  commit id: "HA-Agile Values 1,2"
+  commit id: "Agile Values 1,2"
+  checkout main
+  commit id: "Principle 1..5"
+```
+
+### Pull requests
+
+In most projects, `remote/main` is protected. In effect, we can't just commit or push to `remote/main`. The usual workflow is along these lines
+- push your `feature_agile` to the remote repository: `git push <remote_repo_name> <local_name>`
+  - here `git push origin feature`
+  - to have a different name in the remote repo than locally: `git push <remote_repo_name> <local_name>:<remote_name>`. For example `git push origin feature:remote_feature`
+
+This is called a "pull request" sometimes also a "merge request"
+
+
+Let's make a pull request in the "repo tool"
+- tbd
+- you will realize, that there is another conflict. `main` in remote has changed.
+  - Github lets you look at the conflict, but doesn't provide the tools to fix it.
+
+We are going to resolve the conflict locally and then push the rebased `feature_agile` again.
+- `git checkout feature_agile`
+- `git fetch` to be up to date with the latest content on the remote
+- `git rebase origin/main` rebase directly on main as in origin
+
+Our version of `agile_principles.md` is still sound. But the reason how the principles came about should be part of the code. Let's keep our variant but add the reason (`Some privileged, old ...`) to the file.
+
+Try the pull request again
+- `git push origin feature:feature`
+  - if your local and remote don't match (often because you rebased something locally), push with force: `git push -f origin feature:feature`
+  - careful, things can go wrong this way
+- this time, the pull request should be mergeable
+  - delete the `feature` branch
+
+Clean up our local repository
+- `git fetch --prune origin` get latest updates and remove the connections from local to remote branches
+- either keep or remove the local branches
+  - `git br -D feature_agile`
+  - we use `-D` and not `-d` because the local git has no idea that `feature_agile` was merged to `main`
+- `git switch main` and `git pull main` to update `main`
+
+`main`'s history should now look like this:
+
+```mermaid
+gitGraph
+  commit id: "tbd"
+  commit id: "Agile Principles 1...5"
+  branch feature_agile
+  commit id: "HA-Agile Values 1,2"
+  commit id: "Agile Values 1,2"
+  checkout main
+  merge feature_agile
+```
+
+
+
+# Old
+## Messing with Docker
+docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" vsc-aoc22-068b3058255ca45b4e0ab5efa08e9ec452f95af6ef36afba2cb2c1e4aef0c798-uid /bin/bash
