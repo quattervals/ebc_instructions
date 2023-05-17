@@ -9,9 +9,13 @@
   - in WSL, or real Linux
 - 3-way-diff-capable editor
   - VS Code, Meld, ...
-- cli editor: e.g. vim, nano, emacs
+- CLI editor: e.g. vim, nano, emacs
+- Useful VS Code extensions
+  - `mhutchie.git-graph`
+  - `yzhang.markdown-all-in-one`
 
 ### Configurations
+
 - It is useful to be able to do things in a CLI editor. For example when renaming commits or rebasing.
   - choose your CLI editor with `git config --global core.editor <your_favourite_cli_editor>`
   - editors could be vim, nano, emacs. nano has a gentle learning curve.
@@ -22,6 +26,9 @@
   [user]
   email = <firstname>.<lastname>@bbv.ch
   name = <Firstname> <Lastname>
+
+  [alias]
+    plog = log --graph --oneline --all --decorate
   ```
 
 
@@ -41,6 +48,9 @@ Instead of the "normal" `git@github.com:quattervals/csc.git`
 - who has done that mess? `git blame <filename>`
   - decent IDEs show bleme info when hovering over a line
 - git branch --set-upstream-to=origin/<branch> <local_branch>
+- create branch: `git branch <name>`
+  - create a branch from the current branch and switch to it: `git checkout -b <name>`
+- change branch: `git switch <name>`
 
 
 ## Resources
@@ -186,17 +196,18 @@ The goal is to achieve a history like this:
 ```mermaid
 gitGraph
   commit
-  commit
   branch feature
   commit id: "Add title"
   commit id: "Add Principle 1"
   checkout main
   merge feature
 ```
+Now delete `feature`: `git branch -d feature`
 
 ### Rebasing
 
-Keep your feature branch up to date with the main.
+Keep your feature branch up to date with the `main`.
+We simulate some changes in the `main` that you want to have in the `feature` branch.
 
 We add to `agile_principles.md`
 - create a branch `feature`
@@ -211,7 +222,6 @@ This is how your history looks before the rebase
 
 ```mermaid
 gitGraph
-  commit
   commit
   branch feature
   commit id: "Add Principle 2"
@@ -237,6 +247,7 @@ Rebasing before merging lets us have feature branches which are short. The pros 
 - your feature is based on up to date `main` not on some ancient `main`
 - possible conflicts are resolved when rebasing, not when merging to `main`
 
+Now delete `feature`
 
 ### Squash/Fixup
 
@@ -261,6 +272,7 @@ History before the fixup
 
 ```mermaid
 gitGraph
+  commit
   commit id: "Principle 2"
   branch feature
   commit id: "Principle 3"
@@ -287,7 +299,7 @@ Let's simulate such a situation. While you develop on `feature`, some incompatib
 We add the real agile values to `agile_values.md`
 - create a branch `feature`
 - add preamble plus values 1 and 2, commit
--
+
 Simulate change on `main`
 - switch to `main`
 - add preamble plus values 1 and 2 of the _half-arsed values_, commit
@@ -296,6 +308,7 @@ So that the history looks like this
 
 ```mermaid
 gitGraph
+  commit
   commit id: "Principle 3,4,5"
   branch feature
   commit id: "Agile Values 1,2"
@@ -331,6 +344,7 @@ If unclear what to do now: `git status` gives often good hints.
 Finish the rebase and merge back to `main` so that the history looks like this
 ```mermaid
 gitGraph
+  commit
   commit id: "Principle 3,4,5"
   branch feature
   commit id: "HA-Agile Values 1,2"
@@ -365,15 +379,20 @@ The history should now look like this:
 gitGraph
   commit
   branch feature_agile
-  commit id: "HA-Agile Values 1,2"
-  commit id: "Agile Values 1,2"
+  commit id: "Principles: Title"
+  commit id: "Principles: Principle 1"
+  commit id: "Values: Add file with title"
+  commit id: "Principles: Principle 2"
+  commit id: "Principles: Principle 3...5"
+  commit id: "Values: Half-Arsed 1..2"
+  commit id: "Values: Values 1..2"
   checkout main
-  commit id: "Principle 1..5"
+  commit id: "Principles: privileged principles 1..5"
 ```
 
 ### Pull requests
 
-In most projects, `remote/main` is protected. In effect, we can't just commit or push to `remote/main`. The usual workflow is along these lines
+In most projects, `remote/main` is protected. In effect, we can't just commit or push to `remote/main`. The usual workflow is along these lines:
 - push your `feature_agile` to the remote repository: `git push <remote_repo_name> <local_name>`
   - here `git push origin feature`
   - to have a different name in the remote repo than locally: `git push <remote_repo_name> <local_name>:<remote_name>`. For example `git push origin feature:remote_feature`
@@ -390,6 +409,7 @@ We are going to resolve the conflict locally and then push the rebased `feature_
 - `git checkout feature_agile`
 - `git fetch` to be up to date with the latest content on the remote
 - `git rebase origin/main` rebase directly on main as in origin
+  - This might need to be done in many steps. All of the commits in `feature` might be affected by some conflict
 
 Our version of `agile_principles.md` is still sound. But the reason how the principles came about should be part of the code. Let's keep our variant but add the reason (`Some privileged, old ...`) to the file.
 
@@ -403,21 +423,26 @@ Try the pull request again
 Clean up our local repository
 - `git fetch --prune origin` get latest updates and remove the connections from local to remote branches
 - either keep or remove the local branches
-  - `git br -D feature_agile`
-  - we use `-D` and not `-d` because the local git has no idea that `feature_agile` was merged to `main`
+  - `git br -d feature_agile`
+  - Sometimes we need to use `-D` and not `-d` because the local git sometimes misses the fact that `feature_agile` was merged to `main`
 - `git switch main` and `git pull main` to update `main`
 
-`main`'s history should now look like this:
+`main`'s history should now look similar like this:
 
 ```mermaid
 gitGraph
-  commit id: "tbd"
-  commit id: "Agile Principles 1...5"
-  branch feature_agile
-  commit id: "HA-Agile Values 1,2"
-  commit id: "Agile Values 1,2"
+  commit
+  commit id: "Principles: Privileged"
+  branch _
+  commit id: "Principles: Title"
+  commit id: "Principles: Principle 1"
+  commit id: "Values: Add file with title"
+  commit id: "Principles: Principle 2"
+  commit id: "Principles: Principle 3...5"
+  commit id: "Values: Half-Arsed 1..2"
+  commit id: "Values: Values 1..2"
   checkout main
-  merge feature_agile
+  merge _
 ```
 
 ### Team work pull requests
@@ -425,6 +450,42 @@ gitGraph
 Repeat the above procedure. Each participant adds a different Agile Principle to `agile_principles.md`. Commit, push and rebase concurrently.
 
 
+## Extra
+
+The commit which introduced the half-arsed principles 1..2 doesn't actually do anything of value. We might remove it from our feature branch.
+Use `git rebase -i <hash_of_offending_commit>~2`
+
+
 # Old
 ## Messing with Docker
 docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" vsc-aoc22-068b3058255ca45b4e0ab5efa08e9ec452f95af6ef36afba2cb2c1e4aef0c798-uid /bin/bash
+
+
+
+# Regie
+
+Privileged principles 1...5
+```md
+# Agile Principles
+
+Some privileged, old, white, american men have gathered and cooked up some principles:
+
+1. Our highest priority is to satisfy the customer
+through early and continuous delivery
+of valuable software.
+
+2. Welcome changing requirements, even late in
+development. Agile processes harness change for
+the customer's competitive advantage.
+
+3. Deliver working software frequently, from a
+couple of weeks to a couple of months, with a
+preference to the shorter timescale.
+
+4. Business people and developers must work
+together daily throughout the project.
+
+5. Build projects around motivated individuals.
+Give them the environment and support they need,
+and trust them to get the job done.
+```
