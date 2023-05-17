@@ -420,6 +420,9 @@ gitGraph
   merge feature_agile
 ```
 
+### Team work pull requests
+
+Repeat the above procedure. Each participant adds a different Agile Principle to `agile_principles.md`. Commit, push and rebase concurrently.
 
 
 # Old
