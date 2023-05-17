@@ -45,7 +45,7 @@ docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xau
 ## Resources
 - [Agile Manifesto: Values](https://agilemanifesto.org/)
 - [Agile Manifesto: Principles](https://agilemanifesto.org/principles.html)
-- [Agile Manifesto: the practical values](https://www.halfarsedagilemanifesto.org/)
+- [Agile Manifesto: Values found in practice](https://www.halfarsedagilemanifesto.org/)
 
 
 
@@ -134,7 +134,7 @@ its behavior accordingly.
 
 
 
-### Branch out, make changes, commit, merge back
+### Simple Workflow
 
 Absolute minimal workflow
 
@@ -148,16 +148,16 @@ We add to `agile_principles.md`
 The goal is to achieve a history like this:
 ```mermaid
 gitGraph
-    commit
-    commit
-    branch feature
-    commit id: "Add title"
-    commit id: "Add Principle 1"
-    checkout main
-    merge feature
+  commit
+  commit
+  branch feature
+  commit id: "Add title"
+  commit id: "Add Principle 1"
+  checkout main
+  merge feature
 ```
 
-### Branch out, make changes, commit, rebase onto `main`
+### Rebasing
 
 Keep your feature branch up to date with the main.
 
@@ -168,31 +168,40 @@ We add to `agile_principles.md`
 - add file `agile_principles.md`, commit
 - switch to branch feature
 - rebase feature onto `main`
+- merge back to `main`
 
 This is how your history looks before the rebase
 
 ```mermaid
 gitGraph
-    commit
-    commit
-    branch feature
-    commit id: "Add Principle 2"
-    checkout main
-    commit id: "Add agile_principles.md"
+  commit
+  commit
+  branch feature
+  commit id: "Add Principle 2"
+  checkout main
+  commit id: "Add agile_principles.md"
 ```
 This is how your history looks after the rebase.
 After the rebase, `feature` has the same history as the main branch plus the `feature` development on top
 
 ```mermaid
 gitGraph
-    commit
-    commit
-    commit id: "Add agile_principles.md"
-    branch feature
-    commit id: "Add Principle 2"
+  commit
+  commit
+  commit id: "Add agile_principles.md"
+  branch feature
+  commit id: "Principle 2"
+  checkout main
+  merge feature
 ```
 
-### Branch out, make changes, commit, squash, merge back
+Rebasing before merging lets us have feature branches which are short. The pros are:
+- the history of `main` looks tidy
+- your feature is based on up to date `main` not on some ancient `main`
+- possible conflicts are resolved when rebasing, not when merging to `main`
+
+
+### Squash/Fixup
 
 While developing, it is beneficial to commit often.
 But you also might want to tidy things up. For example principle 3..5 belong together.
@@ -211,36 +220,32 @@ We add to `agile_principles.md`
   - notice the hashes have changed
 - merge to `main`
 
+History before the fixup
+
+```mermaid
+gitGraph
+  commit id: "Principle 2"
+  branch feature
+  commit id: "Principle 3"
+  commit id: "Principle 4"
+  commit id: "Principle 5"
+```
+
+History after the fixup and merge back to `main`
+
+```mermaid
+gitGraph
+  commit id: "Principle 2"
+  branch feature
+  commit id: "Principle 3,4,5"
+  checkout main
+  merge feature
+```
+
+
 
 ### Push some branch to remote
 
 ### merge on remote
 
 ### rebase, merge conflic
-
-This is a regular paragraph.
-
-
-
-This is another regular paragraph.
-
-
-
-
-```mermaid
-%%{init: { 'theme': 'base' } }%%
-gitGraph
-    commit
-    commit id: "Fixed Issue #42"
-    commit
-```
-
-
-
-```mermaid
-  graph TD;
-      A-->B;
-      A-->C;
-      B-->D;
-      C-->D;
-```
